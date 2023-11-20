@@ -1,0 +1,15 @@
+function decodeUplink(input) {
+  let tem = String.fromCharCode(input.bytes[0]); // letter T
+  let tem_data = input.bytes[1]; 		// Temperature data
+  let hum = String.fromCharCode(input.bytes[2]); // letter H
+  let hum_data = input.bytes[3];			// Humidity data
+  let ldr = String.fromCharCode(input.bytes[4]); // letter L
+  let ldr_data = input.bytes[5];			// ldr data
+  return {
+    data: {
+      Temperature: tem_data, 
+      Humidity: hum_data,
+      ldr: ldr_data 
+    }
+  };
+}

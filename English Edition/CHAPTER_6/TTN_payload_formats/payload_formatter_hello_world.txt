@@ -1,0 +1,7 @@
+function decodeUplink(input) {
+  return {
+    data: {
+      myTestValue: String.fromCharCode.apply(null, input.bytes)
+    }
+  };
+}

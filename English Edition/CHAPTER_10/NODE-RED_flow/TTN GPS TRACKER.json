@@ -1,0 +1,517 @@
+[
+    {
+        "id": "d47425b43d0b9d52",
+        "type": "tab",
+        "label": "TTN GPS TRACKER",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "79493bf648f7582c",
+        "type": "worldmap",
+        "z": "d47425b43d0b9d52",
+        "name": "",
+        "lat": "30",
+        "lon": "0",
+        "zoom": "15",
+        "layer": "OSMC",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "showruler": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriDG,UKOS,OpTop",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 1080,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "acd684bc1f754c9a",
+        "type": "ui_template",
+        "z": "d47425b43d0b9d52",
+        "group": "af533edf75b6f60b",
+        "name": "Map widget",
+        "order": 5,
+        "width": 28,
+        "height": 17,
+        "format": "<iframe \n    id='frame'\n    src='/worldmap'\n    width='1200'  \n    height='800'\n>\n</iframe>\n\n<script>\nscope.$watch('msg.payload', function(newv, oldv, scope) \n{\n    $(\"#frame\")[0].contentWindow.postMessage(JSON.stringify(newv), '*');\n});\n</script>",
+        "storeOutMessages": false,
+        "fwdInMessages": false,
+        "resendOnRefresh": false,
+        "templateScope": "local",
+        "className": "",
+        "x": 1250,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8a164650d16ef87f",
+        "type": "function",
+        "z": "d47425b43d0b9d52",
+        "name": "EXTRACT COORDINATES",
+        "func": "//get the payloads from TTN ABP\n//var lon=msg.payload.uplink_message.decoded_payload.gps_1.longitude;\n//var lat=msg.payload.uplink_message.decoded_payload.gps_1.latitude;\n\n//get the payloads from TTN OTAA\nvar lon = msg.payload.location_solved.location.longitude\nvar lat= msg.payload.location_solved.location.latitude\n\nconsole.log(lon)//print on the console command prompt\nconsole.log(lat) //print on the console command prompt\n\n//create msg values\nvar msg1 = lon;\nvar msg2 = lat;\nvar msgx={} //create the msgx object\n\nmsgx.payload = { //create the msgx payload\n    msg1: lon,\n    msg2: lat\n};\nflow.set(\"lat\", lat) //store the latitude value\nflow.set(\"lon\", lon) //store the longitude value\nreturn msgx;\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 80,
+        "wires": [
+            [
+                "7d2180bd9431f90c"
+            ]
+        ]
+    },
+    {
+        "id": "fc4dd4abfa7e2a43",
+        "type": "mqtt in",
+        "z": "d47425b43d0b9d52",
+        "name": "MQTT TTN UPLINK",
+        "topic": "#",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "a25e29010afd0296",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 390,
+        "y": 80,
+        "wires": [
+            [
+                "737e8b42c12ee1b0",
+                "9d2d01a3b3b81584"
+            ]
+        ]
+    },
+    {
+        "id": "737e8b42c12ee1b0",
+        "type": "json",
+        "z": "d47425b43d0b9d52",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 610,
+        "y": 80,
+        "wires": [
+            [
+                "8a164650d16ef87f",
+                "6aa0c33a1362bc67",
+                "47711f9e51342868"
+            ]
+        ]
+    },
+    {
+        "id": "5fd30697fbfce05f",
+        "type": "debug",
+        "z": "d47425b43d0b9d52",
+        "name": "debug 66",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "6aa0c33a1362bc67",
+        "type": "function",
+        "z": "d47425b43d0b9d52",
+        "name": "function worldmap",
+        "func": "var f_lat = flow.get(\"lat\") //read the lat value from the flow\nvar f_lon = flow.get(\"lon\") //read the lon value from the flow\n\nvar thing = { // json object to setup and pass coordinates to Worldmap\n    layer:\"OSM\", //type of layer\n    name:\"GPS LED\", //name of the layer\n    lat:f_lat, //lat coordinate\n    lon:f_lon, //lon coordinate\n    radius:100, // radius of the circle that appears on the map\n    icon: \"fa-lightbulb-o\", // fa library icon (lightbulb)\n    //icon:\":smile:\",\n    //icon:\"plane\", \n    iconColor: \"red\", // color of the icon\n    zoom:16, // zoom of the map\n    extrainfo:\"Some extra information\"\n};\nmsg.payload = thing; // payload of the message to send to Worldmap\nmsg.payload.command =  {// command to send the payload to Worldmap\n     layer:\"OSM\",\n     lat:f_lat, \n     lon:f_lon,\n     zoom:16\n};\nreturn msg\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 180,
+        "wires": [
+            [
+                "79493bf648f7582c",
+                "5fd30697fbfce05f"
+            ]
+        ]
+    },
+    {
+        "id": "d83ebde0dcd0bde2",
+        "type": "inject",
+        "z": "d47425b43d0b9d52",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 420,
+        "y": 140,
+        "wires": [
+            [
+                "6aa0c33a1362bc67"
+            ]
+        ]
+    },
+    {
+        "id": "7d2180bd9431f90c",
+        "type": "debug",
+        "z": "d47425b43d0b9d52",
+        "name": "debug 67",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "2ced4308da28bc3b",
+        "type": "ui_button",
+        "z": "d47425b43d0b9d52",
+        "name": "led_on",
+        "group": "af533edf75b6f60b",
+        "order": 1,
+        "width": 5,
+        "height": 1,
+        "passthru": true,
+        "label": "LED ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 530,
+        "y": 340,
+        "wires": [
+            [
+                "782316d73847712c",
+                "922a74f0fd3d02ee"
+            ]
+        ]
+    },
+    {
+        "id": "de96577d75f2068f",
+        "type": "mqtt out",
+        "z": "d47425b43d0b9d52",
+        "name": "MQTT TTN DOWNLINK",
+        "topic": "v3/my-ok-app@ttn/devices/dev-1/down/push",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "a25e29010afd0296",
+        "x": 1070,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "e290d5ee95c5a441",
+        "type": "debug",
+        "z": "d47425b43d0b9d52",
+        "name": "debug 68",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "782316d73847712c",
+        "type": "function",
+        "z": "d47425b43d0b9d52",
+        "name": "downlink ON",
+        "func": "msg.payload = {\n    \"downlinks\": [{\n        \"f_port\": 15,\n        \"confirmed\": false,\n        \"frm_payload\": \"b24=\",  //payload_raw: Buffer.from(bytes).toString('base64')\n        \"priority\": \"HIGH\"\n\n    }]\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 340,
+        "wires": [
+            [
+                "de96577d75f2068f",
+                "e290d5ee95c5a441"
+            ]
+        ]
+    },
+    {
+        "id": "bc292fcb7ebcf325",
+        "type": "inject",
+        "z": "d47425b43d0b9d52",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 340,
+        "wires": [
+            [
+                "2ced4308da28bc3b"
+            ]
+        ]
+    },
+    {
+        "id": "5fd81eabaa62744e",
+        "type": "function",
+        "z": "d47425b43d0b9d52",
+        "name": "downlink OFF",
+        "func": "msg.payload = {\n    \"downlinks\": [{\n        \"f_port\": 15,\n        \"confirmed\": false,\n        \"frm_payload\": \"b2Zm\",\n        \"priority\": \"HIGH\"\n\n    }]\n}\n //payload_raw: Buffer.from(bytes).toString('base64')\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 300,
+        "wires": [
+            [
+                "de96577d75f2068f",
+                "e290d5ee95c5a441"
+            ]
+        ]
+    },
+    {
+        "id": "cf140f3fe28593a8",
+        "type": "inject",
+        "z": "d47425b43d0b9d52",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 300,
+        "wires": [
+            [
+                "e8ceddc9f9221503"
+            ]
+        ]
+    },
+    {
+        "id": "e8ceddc9f9221503",
+        "type": "ui_button",
+        "z": "d47425b43d0b9d52",
+        "name": "led_off",
+        "group": "af533edf75b6f60b",
+        "order": 2,
+        "width": 5,
+        "height": 1,
+        "passthru": true,
+        "label": "LED OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 530,
+        "y": 300,
+        "wires": [
+            [
+                "5fd81eabaa62744e",
+                "922a74f0fd3d02ee"
+            ]
+        ]
+    },
+    {
+        "id": "47711f9e51342868",
+        "type": "debug",
+        "z": "d47425b43d0b9d52",
+        "name": "debug 69",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "922a74f0fd3d02ee",
+        "type": "ui_led",
+        "z": "d47425b43d0b9d52",
+        "order": 3,
+        "group": "af533edf75b6f60b",
+        "width": 5,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "led-on",
+        "x": 750,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "9d2d01a3b3b81584",
+        "type": "debug",
+        "z": "d47425b43d0b9d52",
+        "name": "debug 70",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "854555c3f6eb937c",
+        "type": "ui_spacer",
+        "z": "d47425b43d0b9d52",
+        "name": "spacer",
+        "group": "af533edf75b6f60b",
+        "order": 4,
+        "width": 13,
+        "height": 1
+    },
+    {
+        "id": "af533edf75b6f60b",
+        "type": "ui_group",
+        "name": "WORLD TRACKER",
+        "tab": "8906c07bd0b92ea0",
+        "order": 1,
+        "disp": true,
+        "width": 28,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a25e29010afd0296",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "eu1.cloud.thethings.network:1883",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "compatmode": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "8906c07bd0b92ea0",
+        "type": "ui_tab",
+        "name": "WORLD TRACKER",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

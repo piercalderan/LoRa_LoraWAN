@@ -1,0 +1,14 @@
+Arduino Serial Monitor Sketch
+Here is the sketch to upload to the Arduino UNO tab for serial monitoring of incoming data.
+
+void setup() {
+Serial.begin (9600);
+}
+
+void loop () {
+if (Serial.available())
+{
+char in_byte = Serial.read();
+Serial.print(in_byte);
+}
+}
