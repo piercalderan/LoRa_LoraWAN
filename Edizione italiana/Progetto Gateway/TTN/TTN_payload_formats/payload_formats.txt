@@ -1,0 +1,24 @@
+Funzione Decoder:
+function Decoder(bytes, port) {
+var decoded = {};
+LoRa e LoraWAN 167
+decoded.d1 = bytes[0];
+decoded.d2 = bytes[1];
+decoded.d3 = bytes[2];
+decoded.d4 = bytes[3];
+decoded.d5 = bytes[4];
+decoded.d6 = bytes[5];
+decoded.d7 = bytes[6];
+decoded.d8 = bytes[7];
+return decoded;
+}
+
+Funzione Converter:
+function Converter(decoded, port) {
+return decoded;
+}
+
+Funzione Validator:
+function Validator(converted, port) {
+return true;
+}

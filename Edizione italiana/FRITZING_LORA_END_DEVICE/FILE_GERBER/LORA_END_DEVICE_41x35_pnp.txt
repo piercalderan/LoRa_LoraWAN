@@ -1,0 +1,24 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=LORA_END_DEVICE_41x35
+*Date=18:36:50
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;1.2795;-8.88184;0;Bottom;Via3
+2;;THT;22.4874;-1.82901;-90;Bottom;J6
+3;;;28.8823;-25.4271;0;Bottom;Via2
+4;;;38.1166;-32.9441;0;Bottom;Hole1
+5;;THT;3.27575;-30.7887;0;Bottom;J8
+6;;;1.92155;-2.46411;0;Bottom;Hole2
+7;;THT;22.4874;-15.799;-90;Bottom;J7
+8;;dip;22.5605;-8.81401;-90;Bottom;U4
+9;;;16.8265;-26.3903;0;Top;RFM1
